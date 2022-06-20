@@ -5,7 +5,7 @@
 #include <cmath> // for fabs()
 int const static n=9,mx=100,my=100; //number of latttice nodes
 int c=2;//different cases
-int freq=20;//output frequency
+int freq=1;//output frequency
 double f_r[n][mx][my],f_b[n][mx][my],f[n][mx][my],feq_r[n][mx][my],feq_b[n][mx][my],feq[n][mx][my],rho_r[mx][my],rho_b[mx][my],rho[mx][my];
 double cx[n],cy[n],w[n],u[mx][my],v[mx][my],x[mx],y[my];
 double CGx[mx][my],CGy[mx][my];//color-gradient
@@ -21,7 +21,7 @@ double a=mx/10,b=my/5;
 int dx=1,dy=1; //space and time step
 double const alpha=0.17;
 double omega=1.0/(3.*alpha+0.5);
-int mstep=500; // The total number of time steps 
+int mstep=40; // The total number of time steps 
 void result(std::string filename,int time)
 {
 
@@ -214,22 +214,37 @@ void ComputeColorGradient()
     {
         for(int j=0;j<my;j++)
         {
-            double f_diffx=0;
-            double f_diffy=0;
+            // double f_diffx=0;
+            // double f_diffy=0;
             CGx[i][j]=0.0;
             CGy[i][j]=0.0;
             // double cg_w[9] = {1.0/3.0, 1.0/3.0, 1.0/3.0, 1.0/3.0, 1.0/3.0, 1.0/12.0, 1.0/12.0, 1.0/12.0, 1.0/12.0};
-            for(int k=0;k<9;k++)
-            {
+            // for(int k=0;k<9;k++)
+            // {
+                int y_n = j%(my-1) + 1;
+                int x_e = i%(mx-1) + 1;
+                int y_s = my-1 - (my- j)%my;
+                int x_w = mx-1 - (mx- i)%mx;
+                CGx[i][j] = cx[1] *(rho_r[x_e][j] - rho_b[x_e][j])
+                 + cx[5] *(rho_r[x_e][y_n] - rho_b[x_e][y_n])
+                 + cx[8] *(rho_r[x_e][y_s] - rho_b[x_e][y_s])
+                 + cx[3] *(rho_r[x_w][j] - rho_b[x_w][j])
+                 + cx[6] *(rho_r[x_w][y_n] - rho_b[x_w][y_n])
+                 + cx[7] *(rho_r[x_w][y_s] - rho_b[x_w][y_s]);
+                CGy[i][j] = cy[2] *(rho_r[i][y_n] - rho_b[i][y_n])
+                 + cy[5] *(rho_r[x_e][y_n] - rho_b[x_e][y_n])
+                 + cy[6] *(rho_r[x_w][y_n] - rho_b[x_w][y_n])
+                 + cy[4] *(rho_r[i][y_s] - rho_b[i][y_s])
+                 + cy[7] *(rho_r[x_w][y_s] - rho_b[x_w][y_s])
+                 + cy[8] *(rho_r[x_e][y_s] - rho_b[x_e][y_s]);
                 // f_diffx+=(rho_b[i][j]-rho_r[i][j])/(rho_b[i][j]+rho_r[i][j])*cx[k]*cg_w[k];
                 // f_diffy+=(rho_b[i][j]-rho_r[i][j])/(rho_b[i][j]+rho_r[i][j])*cy[k]*cg_w[k];
 
-                f_diffx+=cx[k]*(rho_b[i][j]-rho_r[i][j]);
-                f_diffy+=cy[k]*(rho_b[i][j]-rho_r[i][j]);
-            }
-            CGx[i][j]=f_diffx;
-            CGy[i][j]=f_diffy;
+                // f_diffx+=cx[k]*(rho_b[i][j]-rho_r[i][j]);
+                // f_diffy+=cy[k]*(rho_b[i][j]-rho_r[i][j]);
         }
+            // CGx[i][j]=f_diffx;
+            // CGy[i][j]=f_diffy;
     }
 
     // correct north boundary
@@ -290,6 +305,7 @@ void collsion()
                     collision_2_r[k][i][j]=A_r/2*CG_norm*(w[k]*pow((prodc_c_g/CG_norm),2)-B[k]);
 
                     collision_2_b[k][i][j]=A_b/2*CG_norm*(w[k]*pow((prodc_c_g/CG_norm),2)-B[k]);
+                    std::cout<<collision_2_r[k][i][j]<<std::endl;
                 }
                 else
                 {
@@ -500,8 +516,23 @@ void Streaming()
             f[8][i][j]=f_b[8][i][j]+f_r[8][i][j];
         }
     }
+
+    // for(int i=0;i<mx;i++)
+    // {
+    //     for(int j=0;j<my;j++)
+    //     {
+    //         f[1][i][j]=f_b[1][i][j]+f_r[1][i][j];
+    //         f[2][i][j]=f_b[2][i][j]+f_r[2][i][j];
+    //         f[3][i][j]=f_b[3][i][j]+f_r[3][i][j];
+    //         f[4][i][j]=f_b[4][i][j]+f_r[4][i][j];
+    //         f[5][i][j]=f_b[5][i][j]+f_r[5][i][j];
+    //         f[6][i][j]=f_b[6][i][j]+f_r[6][i][j];
+    //         f[7][i][j]=f_b[7][i][j]+f_r[7][i][j];
+    //         f[8][i][j]=f_b[8][i][j]+f_r[8][i][j];
+    //     }
+    // }
 }
-void BoundaryCondition()
+void Boundarcyondition()
 {
     for(int j=0;j<my;j++)
     {
@@ -641,7 +672,7 @@ collsion();
 //rhouv();
 // recoloring();
 Streaming();
-BoundaryCondition();
+Boundarcyondition();
 rhouv();
 std::string filename = std::string("animation") +std::to_string(time)+std::string(".dat");
 if(time%freq==0)
