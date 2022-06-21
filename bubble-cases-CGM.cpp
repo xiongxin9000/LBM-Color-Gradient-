@@ -6,7 +6,7 @@
 int const static n=9,mx=100,my=100; //number of latttice nodes
 int c=2;//different cases
 int freq=1;//output frequency
-double f_r[n][mx][my],f_b[n][mx][my],f_05_b[n][mx][my],f_05_r[n][mx][my],f[n][mx][my],feq_r[n][mx][my],feq_b[n][mx][my],feq[n][mx][my],rho_r[mx][my],rho_b[mx][my],rho[mx][my];
+double f_r[n][mx][my],f_b[n][mx][my],f[n][mx][my],feq_r[n][mx][my],feq_b[n][mx][my],feq[n][mx][my],rho_r[mx][my],rho_b[mx][my],rho[mx][my];
 double cx[n],cy[n],w[n],u[mx][my],v[mx][my],x[mx],y[my];
 double CGx[mx][my],CGy[mx][my];//color-gradient
 //double cosin;
@@ -22,7 +22,7 @@ double a=mx/10,b=my/5;
 int dx=1,dy=1; //space and time step
 double const alpha=0.17;
 double omega=1.0/(3.*alpha+0.5);
-int mstep=40; // The total number of time steps 
+int mstep=500; // The total number of time steps 
 void result(std::string filename,int time)
 {
 
@@ -383,120 +383,153 @@ void Streaming()
     }
 
      //boundary
-//     for (int i=1; i < mx-1; i++)
-//     {
-// 		//north boundary
-// 		int j = my-1;
-// 		f_05_r[1][i][j] = f_r[1][i-1][j]; 
-// 		f_05_r[2][i][j] = f_r[2][i][j-1]; 
-// 		f_05_r[3][i][j] = f_r[3][i+1][j];
-// 		f_05_r[5][i][j] = f_r[5][i-1][j-1];
-// 		f_05_r[6][i][j] = f_r[6][i+1][j-1];
-
-//         f_05_b[1][i][j] = f_b[1][i-1][j]; 
-// 		f_05_b[2][i][j] = f_b[2][i][j-1]; 
-// 		f_05_b[3][i][j] = f_b[3][i+1][j];
-// 		f_05_b[5][i][j] = f_b[5][i-1][j-1];
-// 		f_05_b[6][i][j] = f_b[6][i+1][j-1];
-
-//         //South boundary
-// 		j = 0;
-//         f_05_r[1][i][j]=f_r[1][i-1][j];
-//         f_05_r[3][i][j]=f_r[3][i+1][j];
-//         f_05_r[4][i][j]=f_r[4][i][j+1];
-//         f_05_r[7][i][j]=f_r[7][i+1][j+1];
-//         f_05_r[8][i][j]=f_r[8][i-1][j+1];
-
-//         f_05_b[1][i][j]=f_b[1][i-1][j];
-//         f_05_b[3][i][j]=f_b[3][i+1][j];
-//         f_05_b[4][i][j]=f_b[4][i][j+1];
-//         f_05_b[7][i][j]=f_b[7][i+1][j+1];
-//         f_05_b[8][i][j]=f_b[8][i-1][j+1];
-//     }
-
-//     for (int j=1;j < my-1;j++)
-//     {
-//     //east
-//     int i = n-1;
-//     f_05_r[1][i][j]=f_r[1][i-1][j];
-//     f_05_r[2][i][j]=f_r[2][i][j-1];
-//     f_05_r[4][i][j]=f_r[4][i][j+1];
-//     f_05_r[5][i][j]=f_r[5][i-1][j-1];
-//     f_05_r[8][i][j]=f_r[8][i-1][j+1];
-
-//     f_05_b[1][i][j]=f_b[1][i-1][j];
-//     f_05_b[2][i][j]=f_b[2][i][j-1];
-//     f_05_b[4][i][j]=f_b[4][i][j+1];
-//     f_05_b[5][i][j]=f_b[5][i-1][j-1];
-//     f_05_b[8][i][j]=f_b[8][i-1][j+1];
-
-//     //west
-//     i = 0;
-//     f_05_r[2][i][j]=f_r[2][i][j-1];
-//     f_05_r[3][i][j]=f_r[3][i+1][j];
-//     f_05_r[4][i][j]=f_r[4][i][j+1];
-//     f_05_r[6][i][j]=f_r[6][i+1][j-1];
-//     f_05_r[7][i][j]=f_r[7][i+1][j+1];
-
-//     f_05_b[2][i][j]=f_b[2][i][j-1];
-//     f_05_b[3][i][j]=f_b[3][i+1][j];
-//     f_05_b[4][i][j]=f_b[4][i][j+1];
-//     f_05_b[6][i][j]=f_b[6][i+1][j-1];
-//     f_05_b[7][i][j]=f_b[7][i+1][j+1];
-//     }
-
-//     //corner
-//     // north-east corner
-//     int i=mx-1; int j=my-1;
-//     f_05_r[1][i][j] =f_r[1][i-1][j];
-// 	f_05_r[2][i][j] =f_r[2][i][j-1];
-// 	f_05_r[5][i][j] =f_r[3][i-1][j-1];
-
-//     f_05_b[1][i][j] =f_b[1][i-1][j];
-// 	f_05_b[2][i][j] =f_b[2][i][j-1];
-// 	f_05_b[5][i][j] =f_b[5][i-1][j-1];
-
-//     //north-west corner
-// 	i=0; j=my-1;
-//     f_05_r[2][i][j] =f_r[2][i][j-1];
-// 	f_05_r[3][i][j] =f_r[3][i+1][j];
-// 	f_05_r[6][i][j] =f_r[6][i+1][j-1];
-
-//     f_05_b[2][i][j] =f_b[2][i][j-1];
-// 	f_05_b[3][i][j] =f_b[3][i+1][j];
-// 	f_05_b[6][i][j] =f_b[6][i+1][j-1];
-
-//     // south-east corner
-// 	i=mx-1; j=0;
-//     f_05_r[1][i][j] =f_r[1][i-1][j];
-// 	f_05_r[4][i][j] =f_r[4][i][j+1];
-// 	f_05_r[8][i][j] =f_r[8][i-1][j+1];
-
-//     f_05_b[1][i][j] =f_b[1][i-1][j];
-// 	f_05_b[4][i][j] =f_b[4][i][j+1];
-// 	f_05_b[8][i][j] =f_b[8][i-1][j+1];
-
-//     // south-west corner
-// 	i=0; j=0;
-//     f_05_r[3][i][j] =f_r[3][i+1][j];
-// 	f_05_r[4][i][j] =f_r[4][i][j+1];
-// 	f_05_r[7][i][j] =f_r[7][i+1][j+1];
+		//north boundary
+	    int j = my-1;
+        for(int i=mx-1;i>0;i--)
+        {
+            f_r[1][i][j]=f_r[1][i-1][j];
+            f_b[1][i][j]=f_b[1][i-1][j];
+        }
+        for(int i=0;i<mx;i++)
+        {
+            f_r[3][i][j]=f_r[3][i+1][j];
+            f_b[3][i][j]=f_b[3][i+1][j];
+        }
+		
+        for(int i=0;i<mx;i++)
+        {
+            f_r[2][i][j]=f_r[2][i][j-1];
+            f_b[2][i][j]=f_b[2][i][j-1];
+        }
+        for(int i=mx-1;i>0;i--)
+        {
+            f_r[5][i][j]=f_r[5][i-1][j-1];
+            f_b[5][i][j]=f_b[5][i-1][j-1];
+        }
+        for(int i=0;i<mx;i++)
+        {
+            f_r[6][i][j]=f_r[6][i+1][j-1];
+            f_b[6][i][j]=f_b[6][i+1][j-1];
+        }
+        //South boundary
+		j = 0;
+        for(int i=mx-1;i>0;i--)
+        {
+            f_r[1][i][j]=f_r[1][i-1][j];
+            f_b[1][i][j]=f_b[1][i-1][j];
+        }
+        for(int i=0;i<mx;i++)
+        {
+            f_r[3][i][j]=f_r[3][i+1][j];
+            f_b[3][i][j]=f_b[3][i+1][j];
+        }
+        for(int i=0;i<mx;i++)
+        {
+            f_r[4][i][j]=f_r[4][i][j+1];
+            f_b[4][i][j]=f_b[4][i][j+1];
+        }
+        for(int i=0;i<mx;i++)
+        {
+            f_r[7][i][j]=f_r[7][i+1][j+1];
+            f_b[7][i][j]=f_b[7][i+1][j+1];
+        }
+        for(int i=mx-1;i>0;i--)
+        {
+            f_r[8][i][j]=f_r[8][i-1][j+1];
+            f_b[8][i][j]=f_b[8][i-1][j+1];
+        }
     
-//     f_05_b[3][i][j] =f_b[3][i+1][j];
-// 	f_05_b[4][i][j] =f_b[4][i][j+1];
-// 	f_05_b[7][i][j] =f_b[7][i+1][j+1];
 
-//     for(int i=1;i<mx-1;i++)
-//     {
-//         for(int j=1;j<my-1;j++)
-//         {
-//             for(int k=0;k<9;k++)
-//             {
-//                 f_b[k][i][j]=f_05_b[k][i][j];
-//                 f_r[k][i][j]=f_05_r[k][i][j];
-//             }
-//         }
-//     }
+    //east
+    int i = n-1;
+    for (int j=0;j<my;j++)
+    {
+        f_r[1][i][j]=f_r[1][i-1][j];
+        f_b[1][i][j]=f_b[1][i-1][j];
+    }
+
+   for(int j=my-1;j>0;j--)
+    {
+        f_r[2][i][j]=f_r[2][i][j-1];
+        f_b[2][i][j]=f_b[2][i][j-1];
+        f_r[5][i][j]=f_r[5][i-1][j-1];
+        f_b[5][i][j]=f_b[5][i-1][j-1];
+    }
+    
+   for(int j=0;j<my;j++)
+    {
+        f_r[4][i][j]=f_r[4][i][j+1];
+        f_b[4][i][j]=f_b[4][i][j+1];
+        f_r[8][i][j]=f_r[8][i-1][j+1];
+        f_b[8][i][j]=f_b[8][i-1][j+1];
+    }
+
+
+    //west
+    i = 0;
+    for (int j=0;j<my;j++)
+    {
+        f_r[3][i][j]=f_r[3][i+1][j];
+        f_b[3][i][j]=f_b[3][i+1][j];
+    }
+    
+    for(int j=my-1;j>0;j--)
+    {
+        f_r[2][i][j]=f_r[2][i][j-1];
+        f_b[2][i][j]=f_b[2][i][j-1];
+        f_r[6][i][j]=f_r[6][i+1][j-1];
+        f_b[6][i][j]=f_b[6][i+1][j-1];
+    }
+    
+    for(int j=0;j<my;j++)
+    {
+        f_r[4][i][j]=f_r[4][i][j+1];
+        f_b[4][i][j]=f_b[4][i][j+1];
+        f_r[7][i][j]=f_r[7][i+1][j+1];
+        f_b[7][i][j]=f_b[7][i+1][j+1];
+    }
+
+    //corner
+    // north-east corner
+    i=mx-1; j=my-1;
+    f_r[1][i][j] =f_r[1][i-1][j];
+	f_r[2][i][j] =f_r[2][i][j-1];
+	f_r[5][i][j] =f_r[3][i-1][j-1];
+
+    f_b[1][i][j] =f_b[1][i-1][j];
+	f_b[2][i][j] =f_b[2][i][j-1];
+	f_b[5][i][j] =f_b[5][i-1][j-1];
+
+    //north-west corner
+	i=0; j=my-1;
+    f_r[2][i][j] =f_r[2][i][j-1];
+	f_r[3][i][j] =f_r[3][i+1][j];
+	f_r[6][i][j] =f_r[6][i+1][j-1];
+
+    f_b[2][i][j] =f_b[2][i][j-1];
+	f_b[3][i][j] =f_b[3][i+1][j];
+	f_b[6][i][j] =f_b[6][i+1][j-1];
+
+    // south-east corner
+	i=mx-1; j=0;
+    f_r[1][i][j] =f_r[1][i-1][j];
+	f_r[4][i][j] =f_r[4][i][j+1];
+	f_r[8][i][j] =f_r[8][i-1][j+1];
+
+    f_b[1][i][j] =f_b[1][i-1][j];
+	f_b[4][i][j] =f_b[4][i][j+1];
+	f_b[8][i][j] =f_b[8][i-1][j+1];
+
+    // south-west corner
+	i=0; j=0;
+    f_r[3][i][j] =f_r[3][i+1][j];
+	f_r[4][i][j] =f_r[4][i][j+1];
+	f_r[7][i][j] =f_r[7][i+1][j+1];
+    
+    f_b[3][i][j] =f_b[3][i+1][j];
+	f_b[4][i][j] =f_b[4][i][j+1];
+	f_b[7][i][j] =f_b[7][i+1][j+1];
+
     for(int i=1;i<mx-1;i++)
     {
         for(int j=1;j<my-1;j++)
@@ -547,8 +580,6 @@ void Boundarcyondition()
         f_r[3][mx-1][j]=f_r[3][0][j];//right
         f_r[7][mx-1][j]=f_r[7][0][j];
         f_r[6][mx-1][j]=f_r[6][0][j];
-        
-
     }
 
     for (int i=0;i<mx;i++)
