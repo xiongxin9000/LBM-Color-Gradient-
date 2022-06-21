@@ -211,9 +211,6 @@ cy[0]=0.0,cy[1]=0.0,cy[2]=1.0,cy[3]=0.0,cy[4]=-1.0,cy[5]=1.0,cy[6]=1.0,cy[7]=-1.
                 f[k][i][j]=f_b[k][i][j]+f_r[k][i][j];
                 u[i][j]=0;
                 v[i][j]=0;
-                // feq_r[k][i][j]=w[k]*rho_r[i][j];
-                // feq_b[k][i][j]=w[k]*rho_b[i][j];
-                // feq[k][i][j]=feq_b[k][i][j]+feq_r[k][i][j];
            }
        }
     }
@@ -226,13 +223,10 @@ void ComputeColorGradient()
     {
         for(int j=0;j<my;j++)
         {
-            // double f_diffx=0;
-            // double f_diffy=0;
+            
             CGx[i][j]=0.0;
             CGy[i][j]=0.0;
-            // double cg_w[9] = {1.0/3.0, 1.0/3.0, 1.0/3.0, 1.0/3.0, 1.0/3.0, 1.0/12.0, 1.0/12.0, 1.0/12.0, 1.0/12.0};
-            // for(int k=0;k<9;k++)
-            // {
+            
                 int y_n = j%(my-1) + 1;
                 int x_e = i%(mx-1) + 1;
                 int y_s = my-1 - (my- j)%my;
@@ -249,14 +243,8 @@ void ComputeColorGradient()
                  + cy[4] *(rho_r[i][y_s] - rho_b[i][y_s])
                  + cy[7] *(rho_r[x_w][y_s] - rho_b[x_w][y_s])
                  + cy[8] *(rho_r[x_e][y_s] - rho_b[x_e][y_s]);
-                // f_diffx+=(rho_b[i][j]-rho_r[i][j])/(rho_b[i][j]+rho_r[i][j])*cx[k]*cg_w[k];
-                // f_diffy+=(rho_b[i][j]-rho_r[i][j])/(rho_b[i][j]+rho_r[i][j])*cy[k]*cg_w[k];
-
-                // f_diffx+=cx[k]*(rho_b[i][j]-rho_r[i][j]);
-                // f_diffy+=cy[k]*(rho_b[i][j]-rho_r[i][j]);
+                
         }
-            // CGx[i][j]=f_diffx;
-            // CGy[i][j]=f_diffy;
     }
 
     // correct north boundary
@@ -317,7 +305,6 @@ void collsion()
                         collision_2_r[k][i][j]=A_r/2*CG_norm*(-B[k]);
                         collision_2_b[k][i][j]=A_b/2*CG_norm*(-B[k]);
                     }
-                    // std::cout<<collision_2_r[k][i][j]<<std::endl;
                 }
                 else
                 {
@@ -328,8 +315,7 @@ void collsion()
                 //collision
                 f_b[k][i][j] = f_b[k][i][j] * (1. - omega) + feq_b[k][i][j] * omega+collision_2_b[k][i][j];
                 f_r[k][i][j] = f_r[k][i][j] * (1. - omega) + feq_r[k][i][j] * omega+collision_2_r[k][i][j]; 
-                // C_rf_rollPert = (1-omega_eff)*f_r[index9]+omega_eff*f_req +p_rf_rert;
-                // b_CollPert = (1-omega_eff)*b_f[index9]+omega_eff*b_feq +b_pert;
+                
                 f[k][i][j]=f_b[k][i][j]+f_r[k][i][j];
                 
                 f_b[k][i][j] = rho_b[i][j]/rho[i][j]*f[k][i][j]
@@ -342,55 +328,6 @@ void collsion()
     }
 }
 
-// void recoloring()
-// {
-//     double B[9];
-// 	B[0] = -4.0/ 27.0;
-// 	for(int i = 1; i < 5; i++) B[i] = 2.0 / 27.0;
-//     for(int i = 5; i < 9; i++) B[i] = 5.0 / 108.0;
-//     for(int i=0;i<mx;i++)
-//     {
-//         for(int j=0;j<my;j++)
-//         {
-//                 double CG_norm=sqrt(CGx[i][j]*CGx[i][j]+CGy[i][j]*CGy[i][j]);
-//                 if (CG_norm<0.00000001)
-//                 {
-//                     for (int k=0;k<9;k++)
-//                     {
-//                         f_b[k][i][j] = rho_b[i][j]/rho[i][j]*f[k][i][j];
-//                         f_r[k][i][j] = rho_r[i][j]/rho[i][j]*f[k][i][j];
-//                     }
-//                 }
-//                 else
-//                 {
-//                     //second collision term
-//                     int k=0;
-//                     f_r[k][i][j] = f_r[k][i][j] + A_r/2* CG_norm *(-B[k]);
-//                     f_b[k][i][j] = f_b[k][i][j] + A_b/2* CG_norm *(-B[k]);
-//                     for(int k=1;k<9;k++)
-//                     {
-//                         double prodc_c_g=cx[k]*CGx[i][j]+cy[k]*CGy[i][j];
-//                         double c_norm=sqrt(cx[k]*cx[k]+cy[k]*cy[k]);
-//                         cosin[k]=prodc_c_g/(CG_norm*c_norm);
-//                         f_r[k][i][j] =f_r[k][i][j]+ A_r/2*CG_norm*(w[k]*pow((prodc_c_g/CG_norm),2)-B[k]);
-//                         f_b[k][i][j] =f_b[k][i][j]+ A_b/2*CG_norm*(w[k]*pow((prodc_c_g/CG_norm),2)-B[k]);
-//                     }
-//                     //recoloring
-//                     int k1=0;
-//                     f_b[k1][i][j] = rho_b[i][j]/rho[i][j]*f[k1][i][j];
-//                     f_r[k1][i][j] = rho_r[i][j]/rho[i][j]*f[k1][i][j];
-//                     for(int k1=1;k1<9;k1++)
-//                     {
-//                         // double feq= w[k1]*rho[i][j];
-//                         double temp=rho_b[i][j]*rho_r[i][j]/(rho[i][j]*rho[i][j]);
-//                         f_r[k1][i][j] = rho_r[i][j]/rho[i][j]*f[k1][i][j]+ beta* temp * (C_eq_b[k1]*rho_b[i][j]+C_eq_r[k1]*rho_r[i][j]) *cosin[k1];
-//                         f_b[k1][i][j] = rho_b[i][j]/rho[i][j]*f[k1][i][j]- beta* temp * (C_eq_b[k1]*rho_b[i][j]+C_eq_r[k1]*rho_r[i][j]) *cosin[k1];
-//                     }
-
-//                 }
-//         }
-//     }        
-// }
 void Streaming()
 {
     for (int j=0;j<my;j++)
@@ -597,13 +534,7 @@ void Boundarcyondition()
         f_b[1][0][j]=f_b[1][mx-1][j];//left
         f_b[5][0][j]=f_b[5][mx-1][j];
         f_b[8][0][j]=f_b[8][mx-1][j];
-        //zou-he-west
-        // f[1][0][j]=f[3][0][j]+2/3*rho[0][j]*u[0][j];
-        // rho[0][j]=1/(1-u[0][j])*(f[0][0][j]+f[2][0][j]+f[4][0][j]+2*(f[3][0][j]+f[6][0][j]+f[7][0][j]));
-        // f[5][0][j]=f[7][0][j]-1/2*(f[2][0][j]-f[4][0][j])+1/6*rho[0][j]*u[0][j]+1/2*rho[0][j]*v[0][j];
-        // f[8][0][j]=f[6][0][j]-1/2*(f[2][0][j]-f[4][0][j])+1/6*rho[0][j]*u[0][j]-1/2*rho[0][j]*v[0][j];
-        // CGx[0][j]=1;
-        // CGy[0][j]=1;
+        
 
         f_r[1][0][j]=f_r[1][mx-1][j];//left
         f_r[5][0][j]=f_r[5][mx-1][j];
@@ -616,13 +547,7 @@ void Boundarcyondition()
         f_r[3][mx-1][j]=f_r[3][0][j];//right
         f_r[7][mx-1][j]=f_r[7][0][j];
         f_r[6][mx-1][j]=f_r[6][0][j];
-        //zou-he-east
-        // f[3][mx-1][j]=f[1][mx-1][j]-2/3*rho[mx-1][j]*u[mx-1][j];
-        // rho[mx-1][j]=1/(1+u[mx-1][j])*(f[0][mx-1][j]+f[2][mx-1][j]+f[4][mx-1][j]+2*(f[1][mx-1][j]+f[5][mx-1][j]+f[8][mx-1][j]));
-        // f[7][mx-1][j]=f[5][mx-1][j]-1/2*(f[2][mx-1][j]-f[4][mx-1][j])-1/6*rho[mx-1][j]*u[mx-1][j]-1/2*rho[mx-1][j]*v[mx-1][j];
-        // f[6][mx-1][j]=f[8][mx-1][j]-1/2*(f[2][mx-1][j]-f[4][mx-1][j])-1/6*rho[mx-1][j]*u[mx-1][j]+1/2*rho[mx-1][j]*v[mx-1][j];
-        // CGx[mx-1][j]=2;
-        // CGy[mx-1][j]=2;
+        
 
     }
 
@@ -635,13 +560,7 @@ void Boundarcyondition()
         f_r[2][i][0]=f_r[2][i][my-1];//bottom
         f_r[5][i][0]=f_r[5][i][my-1];
         f_r[6][i][0]=f_r[6][i][my-1];
-        //zou-he-south
-        // f[2][i][0]=f[4][i][0]+2/3*rho[i][0]*v[i][0];
-        // rho[i][0]=1/(1-v[i][0])*(f[0][i][0]+f[1][i][0]+f[3][i][0]+2*(f[4][i][0]+f[7][i][0]+f[8][i][0]));
-        // f[5][i][0]=f[7][i][0]-1/2*(f[1][i][0]-f[3][i][0])+1/6*rho[i][0]*v[i][0]+1/2*rho[i][0]*u[i][0];
-        // f[6][i][0]=f[8][i][0]+1/2*(f[1][i][0]-f[3][i][0])+1/6*rho[i][0]*v[i][0]-1/2*rho[i][0]*u[i][0];
-        // CGx[i][0]=3;
-        // CGy[i][0]=3;
+        
 
         f_b[4][i][my-1]=f_b[4][i][0];//top
         f_b[7][i][my-1]=f_b[7][i][0];
@@ -650,11 +569,7 @@ void Boundarcyondition()
         f_r[4][i][my-1]=f_r[4][i][0];//top
         f_r[7][i][my-1]=f_r[7][i][0];
         f_r[8][i][my-1]=f_r[8][i][0];
-        //zou-he-north
-        // 
         
-        // CGx[i][my-1]=4;
-        // CGy[i][my-1]=4;
     }
 }
 
@@ -671,7 +586,6 @@ void rhouv()
            {
                 ssum_r=ssum_r+f_r[k][i][j];
                 ssum_b=ssum_b+f_b[k][i][j];
-                //f[k][i][j]=f_r[k][i][j]+f_b[k][i][j];
            }
            rho_r[i][j]=ssum_r;
            rho_b[i][j]=ssum_b;
@@ -698,18 +612,10 @@ void rhouv()
                 vsum_r=vsum_r+f_r[k][i][j]*cy[k];
                 vsum=vsum_b+vsum_r;
             }
-            // if(rho[i][j]>0.0001)
-            // {
+            
             u[i][j]=usum/rho[i][j];
             v[i][j]=vsum/rho[i][j];
-            // u[i][j]=((f_b[1][i][j] + f_b[5][i][j] + f_b[8][i][j])-(f_b[3][i][j] + f_b[6][i][j] + f_b[7][i][j])+ f_r[1][i][j] + f_r[5][i][j] + f_r[8][i][j]-(f_r[3][i][j] + f_r[6][i][j] + f_r[7][i][j]))/rho[i][j];
-            // v[i][j]=((f_b[2][i][j] + f_b[5][i][j] + f_b[6][i][j])-(f_b[4][i][j] + f_b[7][i][j] + f_b[8][i][j])+ f_r[2][i][j] + f_r[5][i][j] + f_r[6][i][j]-(f_r[4][i][j] + f_r[7][i][j] + f_r[8][i][j]))/rho[i][j];
-            // }
-            // else 
-            // {
-            // u[i][j]=0;
-            // v[i][j]=0;
-            // }
+            
         }
     }
 }
@@ -724,12 +630,8 @@ result(filename,time);
 for (time=1;time<mstep+1;++time)
 {
 ComputeEquilibrium();//for collision and recoloring
-// std::cout<<"a_k_r= "<<a_k_r<<std::endl;
-// std::cout<<"a_k_b= "<<a_k_b<<std::endl;
 ComputeColorGradient();
 collsion();
-//rhouv();
-// recoloring();
 Streaming();
 Boundarcyondition();
 rhouv();
