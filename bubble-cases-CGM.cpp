@@ -12,7 +12,7 @@ double CGx[mx][my],CGy[mx][my];//color-gradient
 //double cosin;
 double collision_2_r[n][mx][my],collision_2_b[n][mx][my];
 double cosin[n];
-double A_r=0.0001,A_b=0.0001;//parameter that affect the interfacial intension in second term of collision step 
+double A_r=0.1,A_b=0.1;//parameter that affect the interfacial intension in second term of collision step 
 double beta=0.99; //parameter that affect the interface thickness in Recoloring step 
 double C_eq_r[n],C_eq_b[n];//aditional term in equilibrium distribution function
 double a_k_r,a_k_b;//parameter to adjust density ratio in equilibrium distribution function 
@@ -22,13 +22,13 @@ double a=mx/10,b=my/5;
 int dx=1,dy=1; //space and time step
 double const alpha=0.17;
 double omega=1.0/(3.*alpha+0.5);
-int mstep=500; // The total number of time steps 
+int mstep=30; // The total number of time steps 
 void result(std::string filename,int time)
 {
 
 std::ofstream out(filename);
   out << "TITLE=\"LBM output\"" << std::endl;
-  out << "VARIABLES = \"X\", \"Y\", \"U\",\"V\",\"density\",\"f0\",\"f1\",\"f2\",\"f3\",\"f4\",\"f5\",\"f6\",\"f7\",\"f8\",\"feq0\",\"feq1\",\"feq2\",\"feq3\",\"feq4\",\"feq5\",\"feq6\",\"feq7\",\"feq8\",\"CGx\",\"CGy\",\"rho_r\",\"rho_b\"," << std::endl;
+  out << "VARIABLES = \"X\", \"Y\", \"U\",\"V\",\"density\",\"f0\",\"f1\",\"f2\",\"f3\",\"f4\",\"f5\",\"f6\",\"f7\",\"f8\",\"feq0\",\"feq1\",\"feq2\",\"feq3\",\"feq4\",\"feq5\",\"feq6\",\"feq7\",\"feq8\",\"CGx\",\"CGy\",\"rho_r\",\"rho_b\"" << std::endl;
   out << "ZONE T = \"fluid\", I=" << mx << ", J=" << my << ", F=POINT" << std::endl;
   out << "SOLUTIONTIME="<< time << std::endl;
   for (unsigned j = 0; j < my; ++j)
@@ -59,7 +59,7 @@ std::ofstream out(filename);
 void ComputeEquilibrium()
 {
     double t1,t2;
-    a_k_r=0.2;
+    a_k_r=0.4;
     a_k_b=(rho_b0-rho_r0+rho_r0*a_k_r)/rho_b0;
     for (int i=0;i<mx;i++)
     {
@@ -219,6 +219,7 @@ cy[0]=0.0,cy[1]=0.0,cy[2]=1.0,cy[3]=0.0,cy[4]=-1.0,cy[5]=1.0,cy[6]=1.0,cy[7]=-1.
 
 void ComputeColorGradient()
 {
+    // double cg_w[9] = {0.0, 4.0/12.0, 4.0/12.0, 4.0/12.0, 4.0/12.0, 1.0/12.0, 1.0/12.0, 1.0/12.0, 1.0/12.0};
     for (int i=0;i<mx;i++)
     {
         for(int j=0;j<my;j++)
@@ -243,6 +244,19 @@ void ComputeColorGradient()
                  + cy[4] *(rho_r[i][y_s] - rho_b[i][y_s])
                  + cy[7] *(rho_r[x_w][y_s] - rho_b[x_w][y_s])
                  + cy[8] *(rho_r[x_e][y_s] - rho_b[x_e][y_s]);
+
+                //  CGx[i][j] = cx[1] *cg_w[1]*(rho_r[x_e][j] - rho_b[x_e][j])
+                //  + cx[5] *cg_w[5]*(rho_r[x_e][y_n] - rho_b[x_e][y_n])
+                //  + cx[8] *cg_w[8]*(rho_r[x_e][y_s] - rho_b[x_e][y_s])
+                //  + cx[3] *cg_w[3]*(rho_r[x_w][j] - rho_b[x_w][j])
+                //  + cx[6] *cg_w[6]*(rho_r[x_w][y_n] - rho_b[x_w][y_n])
+                //  + cx[7] *cg_w[7]*(rho_r[x_w][y_s] - rho_b[x_w][y_s]);
+                // CGy[i][j] = cy[2] *cg_w[2]*(rho_r[i][y_n] - rho_b[i][y_n])
+                //  + cy[5] *cg_w[5]*(rho_r[x_e][y_n] - rho_b[x_e][y_n])
+                //  + cy[6] *cg_w[6]*(rho_r[x_w][y_n] - rho_b[x_w][y_n])
+                //  + cy[4] *cg_w[4]*(rho_r[i][y_s] - rho_b[i][y_s])
+                //  + cy[7] *cg_w[7]*(rho_r[x_w][y_s] - rho_b[x_w][y_s])
+                //  + cy[8] *cg_w[8]*(rho_r[x_e][y_s] - rho_b[x_e][y_s]);
                 
         }
     }
@@ -279,16 +293,17 @@ void collsion()
 	B[0] = -4.0/ 27.0;
 	for(int i = 1; i < 5; i++) B[i] = 2.0 / 27.0;
     for(int i = 5; i < 9; i++) B[i] = 5.0 / 108.0;
+    double CG_norm;
+    double c_norm=0;
+    double cosin=0;
     for(int i=0;i<mx;i++)
     {
         for(int j=0;j<my;j++)
         {
             for (int k=0;k<9;k++)
             {
-                double CG_norm=sqrt(CGx[i][j]*CGx[i][j]+CGy[i][j]*CGy[i][j]);
-                double c_norm=0;
-                double cosin=0;
-                if(CG_norm>1e-30)
+                CG_norm=sqrt(CGx[i][j]*CGx[i][j]+CGy[i][j]*CGy[i][j]);
+                if(CG_norm>1e-10)
                 {
                     double prodc_c_g=cx[k]*CGx[i][j]+cy[k]*CGy[i][j];
                     if(k!=0)
@@ -530,44 +545,38 @@ void Streaming()
 	f_b[4][i][j] =f_b[4][i][j+1];
 	f_b[7][i][j] =f_b[7][i+1][j+1];
 
-    for(int i=1;i<mx-1;i++)
-    {
-        for(int j=1;j<my-1;j++)
-        {
-            f[1][i][j]=f_b[1][i][j]+f_r[1][i][j];
-            f[2][i][j]=f_b[2][i][j]+f_r[2][i][j];
-            f[3][i][j]=f_b[3][i][j]+f_r[3][i][j];
-            f[4][i][j]=f_b[4][i][j]+f_r[4][i][j];
-            f[5][i][j]=f_b[5][i][j]+f_r[5][i][j];
-            f[6][i][j]=f_b[6][i][j]+f_r[6][i][j];
-            f[7][i][j]=f_b[7][i][j]+f_r[7][i][j];
-            f[8][i][j]=f_b[8][i][j]+f_r[8][i][j];
-        }
-    }
+    // for(int i=0;i<mx;i++)
+    // {
+    //     for(int j=0;j<my;j++)
+    //     {
+    //         f[1][i][j]=f_b[1][i][j]+f_r[1][i][j];
+    //         f[2][i][j]=f_b[2][i][j]+f_r[2][i][j];
+    //         f[3][i][j]=f_b[3][i][j]+f_r[3][i][j];
+    //         f[4][i][j]=f_b[4][i][j]+f_r[4][i][j];
+    //         f[5][i][j]=f_b[5][i][j]+f_r[5][i][j];
+    //         f[6][i][j]=f_b[6][i][j]+f_r[6][i][j];
+    //         f[7][i][j]=f_b[7][i][j]+f_r[7][i][j];
+    //         f[8][i][j]=f_b[8][i][j]+f_r[8][i][j];
 
-    for(int i=0;i<mx;i++)
-    {
-        for(int j=0;j<my;j++)
-        {
-            f[1][i][j]=f_b[1][i][j]+f_r[1][i][j];
-            f[2][i][j]=f_b[2][i][j]+f_r[2][i][j];
-            f[3][i][j]=f_b[3][i][j]+f_r[3][i][j];
-            f[4][i][j]=f_b[4][i][j]+f_r[4][i][j];
-            f[5][i][j]=f_b[5][i][j]+f_r[5][i][j];
-            f[6][i][j]=f_b[6][i][j]+f_r[6][i][j];
-            f[7][i][j]=f_b[7][i][j]+f_r[7][i][j];
-            f[8][i][j]=f_b[8][i][j]+f_r[8][i][j];
-        }
-    }
+    //         f[1][i][j]=f_b[1][i][j]+f_r[1][i][j];
+    //         f[2][i][j]=f_b[2][i][j]+f_r[2][i][j];
+    //         f[3][i][j]=f_b[3][i][j]+f_r[3][i][j];
+    //         f[4][i][j]=f_b[4][i][j]+f_r[4][i][j];
+    //         f[5][i][j]=f_b[5][i][j]+f_r[5][i][j];
+    //         f[6][i][j]=f_b[6][i][j]+f_r[6][i][j];
+    //         f[7][i][j]=f_b[7][i][j]+f_r[7][i][j];
+    //         f[8][i][j]=f_b[8][i][j]+f_r[8][i][j];
+    //     }
+    // }
 }
 void Boundarcyondition()
 {
+    //periodic
     for(int j=0;j<my;j++)
     {
         f_b[1][0][j]=f_b[1][mx-1][j];//left
         f_b[5][0][j]=f_b[5][mx-1][j];
         f_b[8][0][j]=f_b[8][mx-1][j];
-        
 
         f_r[1][0][j]=f_r[1][mx-1][j];//left
         f_r[5][0][j]=f_r[5][mx-1][j];
@@ -581,25 +590,25 @@ void Boundarcyondition()
         f_r[7][mx-1][j]=f_r[7][0][j];
         f_r[6][mx-1][j]=f_r[6][0][j];
     }
-
+    //bounce back
     for (int i=0;i<mx;i++)
     {
-        f_b[2][i][0]=f_b[2][i][my-1];//bottom
-        f_b[5][i][0]=f_b[5][i][my-1];
-        f_b[6][i][0]=f_b[6][i][my-1];
+        f_b[2][i][0]=f_b[4][i][0];//bottom
+        f_b[5][i][0]=f_b[7][i][0];
+        f_b[6][i][0]=f_b[8][i][0];
         
-        f_r[2][i][0]=f_r[2][i][my-1];//bottom
-        f_r[5][i][0]=f_r[5][i][my-1];
-        f_r[6][i][0]=f_r[6][i][my-1];
+        f_r[2][i][0]=f_r[4][i][0];//bottom
+        f_r[5][i][0]=f_r[7][i][0];
+        f_r[6][i][0]=f_r[8][i][0];
         
 
-        f_b[4][i][my-1]=f_b[4][i][0];//top
-        f_b[7][i][my-1]=f_b[7][i][0];
-        f_b[8][i][my-1]=f_b[8][i][0];
+        f_b[4][i][my-1]=f_b[2][i][my-1];//top
+        f_b[7][i][my-1]=f_b[5][i][my-1];
+        f_b[8][i][my-1]=f_b[6][i][my-1];
 
-        f_r[4][i][my-1]=f_r[4][i][0];//top
-        f_r[7][i][my-1]=f_r[7][i][0];
-        f_r[8][i][my-1]=f_r[8][i][0];
+        f_r[4][i][my-1]=f_r[2][i][my-1];//top
+        f_r[7][i][my-1]=f_r[5][i][my-1];
+        f_r[8][i][my-1]=f_r[6][i][my-1];
         
     }
 }
@@ -661,6 +670,8 @@ result(filename,time);
 for (time=1;time<mstep+1;++time)
 {
 ComputeEquilibrium();//for collision and recoloring
+std::cout<<"a_k_b"<<a_k_b<<std::endl;
+std::cout<<"a_k_r"<<a_k_r<<std::endl;
 ComputeColorGradient();
 collsion();
 Streaming();
